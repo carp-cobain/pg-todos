@@ -12,19 +12,13 @@ impl Repo {
             .client
             .query_raw(&self.statements.select_story, &[&id])
             .await?;
-
         pin!(stream);
 
         if let Some(result) = stream.next().await {
             let row = result?;
-            Ok(Story {
-                id: row.get(0),
-                name: row.get(1),
-            })
+            Ok(Story::new(row.get(0), row.get(1)))
         } else {
-            Err(Error::NotFound {
-                message: format!("story not found: {}", id),
-            })
+            Err(Error::not_found(format!("story not found: {}", id)))
         }
     }
 
@@ -36,17 +30,12 @@ impl Repo {
             .client
             .query_raw::<_, _, &[i32; 0]>(&self.statements.select_stories, &[])
             .await?;
-
         pin!(stream);
 
-        let mut stories = Vec::with_capacity(32);
-
+        let mut stories = Vec::with_capacity(10);
         while let Some(result) = stream.next().await {
             let row = result?;
-            stories.push(Story {
-                id: row.get(0),
-                name: row.get(1),
-            });
+            stories.push(Story::new(row.get(0), row.get(1)));
         }
 
         Ok(stories)
@@ -60,19 +49,13 @@ impl Repo {
             .client
             .query_raw(&self.statements.insert_story, &[&name])
             .await?;
-
         pin!(stream);
 
         if let Some(result) = stream.next().await {
             let row = result?;
-            Ok(Story {
-                id: row.get(0),
-                name,
-            })
+            Ok(Story::new(row.get(0), name))
         } else {
-            Err(Error::Internal {
-                message: format!("failed to insert story: {}", name),
-            })
+            Err(Error::internal(format!("failed to insert story: {}", name)))
         }
     }
 

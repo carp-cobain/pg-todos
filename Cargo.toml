@@ -22,9 +22,8 @@ tokio = { version = "1.33", features = ["full"] }
 tokio-postgres = "0.7"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-validator = { version = "0.17", features = ["derive"] }
 
 [profile.release]
 codegen-units = 1
-lto = true
+lto = 'thin'
 panic = 'abort'

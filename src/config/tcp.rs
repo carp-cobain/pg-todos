@@ -13,9 +13,6 @@ impl Config {
     }
 }
 
-// See:
-// https://github.com/TechEmpower/FrameworkBenchmarks/blob/master/frameworks/Rust/axum/src/server.rs#L21
-// NOTE: this uses unsafe calls
 fn reuse_listener(addr: SocketAddr) -> io::Result<TcpListener> {
     let socket = match addr {
         SocketAddr::V4(_) => TcpSocket::new_v4()?,
