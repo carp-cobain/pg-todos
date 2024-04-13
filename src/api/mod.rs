@@ -2,6 +2,7 @@ use crate::{config::Config, repo::Repo};
 use axum::Router;
 use std::sync::Arc;
 
+mod status;
 mod story;
 
 pub struct Api {
@@ -14,7 +15,7 @@ impl Api {
     }
 
     pub fn routes(self) -> Router {
-        story::routes().with_state(self.ctx)
+        story::routes().merge(status::routes()).with_state(self.ctx)
     }
 }
 
