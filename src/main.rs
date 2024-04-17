@@ -1,7 +1,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use pg_todos::{
     api::{Api, Ctx},
     config::Config,

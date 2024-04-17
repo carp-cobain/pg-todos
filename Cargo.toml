@@ -10,7 +10,7 @@ axum = { version = "0.7", default-features = false, features = [
     "http1",
     "tokio",
 ] }
-dotenv = "0.15"
+dotenvy = "0.15"
 futures = "0.3"
 futures-util = "0.3"
 mimalloc = { version = "0.1", default-features = false }
