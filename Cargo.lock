@@ -636,7 +636,6 @@ dependencies = [
  "futures-util",
  "mimalloc",
  "num_cpus",
- "percent-encoding",
  "serde",
  "thiserror",
  "tokio",

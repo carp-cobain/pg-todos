@@ -1,4 +1,3 @@
-use percent_encoding::NON_ALPHANUMERIC;
 use std::{env, io, net::SocketAddr};
 use tokio::net::{TcpListener, TcpSocket};
 
@@ -6,11 +5,7 @@ use tokio::net::{TcpListener, TcpSocket};
 #[derive(Clone, Debug)]
 pub struct Config {
     pub listen_addr: String,
-    pub db_host: String,
-    pub db_port: u16,
-    pub db_user: String,
-    pub db_password: String,
-    pub db_database: String,
+    pub db_url: String,
 }
 
 /// Default for config just calls basic constructor
@@ -23,38 +18,13 @@ impl Default for Config {
 impl Config {
     /// Load config from env vars.
     pub fn load() -> Self {
-        // http server settings
         let port = env::var("HTTP_SERVER_PORT").unwrap_or("8080".into());
+        let db_url = env::var("DATABASE_URL").expect("DATABASE_URL not set");
         let listen_addr = format!("0.0.0.0:{}", port);
-
-        // database settings
-        let db_host = env::var("DB_HOST").expect("DB_HOST not set");
-        let db_port = env::var("DB_PORT")
-            .unwrap_or("5432".to_owned())
-            .parse()
-            .expect("DB_PORT could not be parsed");
-        let db_user = env::var("DB_USER").expect("DB_USER not set");
-        let db_password = env::var("DB_PASS").expect("DB_PASS not set");
-        let db_database = env::var("DB_NAME").expect("DB_NAME not set");
-
-        // Create config
         Self {
             listen_addr,
-            db_host,
-            db_port,
-            db_user,
-            db_password,
-            db_database,
+            db_url,
         }
-    }
-
-    pub fn db_connection_string(&self) -> String {
-        let bytes = self.db_password.as_bytes();
-        let password = percent_encoding::percent_encode(bytes, NON_ALPHANUMERIC);
-        format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.db_user, password, self.db_host, self.db_port, self.db_database,
-        )
     }
 
     pub fn tcp_listener(&self) -> TcpListener {

@@ -43,8 +43,8 @@ fn main() {
 }
 
 async fn serve(config: Arc<Config>) {
-    let ctx = Ctx::new(Arc::clone(&config)).await;
-    let api = Api::new(Arc::new(ctx));
     let listener = config.tcp_listener();
+    let ctx = Ctx::new(config).await;
+    let api = Api::new(Arc::new(ctx));
     axum::serve(listener, api.routes()).await.unwrap();
 }

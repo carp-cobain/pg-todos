@@ -15,7 +15,7 @@ impl Api {
     }
 
     pub fn routes(self) -> Router {
-        story::routes().merge(status::routes()).with_state(self.ctx)
+        status::routes().merge(story::routes()).with_state(self.ctx)
     }
 }
 
@@ -28,7 +28,7 @@ pub struct Ctx {
 impl Ctx {
     pub async fn new(config: Arc<Config>) -> Self {
         let config = Arc::clone(&config);
-        let repo = Arc::new(Repo::new(&config.db_connection_string()).await);
+        let repo = Arc::new(Repo::new(&config.db_url).await);
         Self { config, repo }
     }
 }
