@@ -32,7 +32,7 @@ impl Repo {
             .await?;
         pin!(stream);
 
-        let mut stories = Vec::with_capacity(10);
+        let mut stories = Vec::with_capacity(100);
         while let Some(result) = stream.next().await {
             let row = result?;
             stories.push(Story::new(row.get(0), row.get(1)));
