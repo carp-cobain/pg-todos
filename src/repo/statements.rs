@@ -2,7 +2,7 @@ use tokio_postgres::{Client, Statement};
 
 // SQL queries for the stories table
 const SQL_SELECT_STORY: &str = "select id, name from stories where id = $1";
-const SQL_SELECT_STORIES: &str = "select id, name from stories order by id limit 100";
+const SQL_SELECT_STORIES: &str = "select id, name from stories order by id desc limit 100";
 const SQL_INSERT_STORY: &str = "insert into stories (name) values ($1) returning id";
 const SQL_DELETE_STORY: &str = "delete from stories where id = $1";
 
