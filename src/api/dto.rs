@@ -1,4 +1,4 @@
-use crate::{domain::Task, Error, Result};
+use crate::{Error, Result};
 use serde::Deserialize;
 
 /// The POST body for creating stories
@@ -59,38 +59,42 @@ pub struct PatchTaskBody {
 
 impl PatchTaskBody {
     /// Helper to validate fields to update for a task.
-    pub fn validate(&self, task: Task) -> Result<(String, String)> {
+    pub fn validate(&self) -> Result<(Option<String>, Option<String>)> {
         // Make sure at least one field is provided
         if self.name.is_none() && self.status.is_none() {
             return Err(Error::invalid_args("name and/or status must be provided"));
         }
 
         // Defaults
-        let mut name = task.name;
-        let mut status = task.status;
+        let mut name = None;
+        let mut status = None;
 
         // Validate
         let mut messages = Vec::new();
         if let Some(n) = &self.name {
-            let n = n.trim();
+            let n = n.trim().to_string();
+
             if n.is_empty() || n.len() > 100 {
                 messages.push("name: invalid length".into());
             } else {
-                name = n.to_string();
+                name = Some(n);
             }
         }
+
         if let Some(s) = &self.status {
-            status = s.trim().to_lowercase().to_string();
-            if status != "complete" && status != "incomplete" {
+            let stl = s.trim().to_lowercase();
+            if ["complete".into(), "incomplete".into()].contains(&stl) {
+                status = Some(stl);
+            } else {
                 messages.push("status: invalid enum variant".into());
             }
         }
 
-        // Determine result of validation
-        if messages.is_empty() {
-            Ok((name, status))
-        } else {
-            Err(Error::InvalidArgs { messages })
+        // Check for and return validation failures
+        if !messages.is_empty() {
+            return Err(Error::InvalidArgs { messages });
         }
+
+        Ok((name, status))
     }
 }
