@@ -1,28 +1,39 @@
+use super::sql;
 use tokio_postgres::{Client, Statement};
 
-// SQL queries for the stories table
-const SQL_SELECT_STORY: &str = "select id, name from stories where id = $1";
-const SQL_SELECT_STORIES: &str = "select id, name from stories order by id desc limit 100";
-const SQL_INSERT_STORY: &str = "insert into stories (name) values ($1) returning id";
-const SQL_DELETE_STORY: &str = "delete from stories where id = $1";
-
-/// Grouped prepared statements
-pub(crate) struct Statements {
+/// Pre-cached prepared statements
+pub(crate) struct Cache {
+    // Story
     pub select_story: Statement,
     pub select_stories: Statement,
     pub insert_story: Statement,
+    pub update_story: Statement,
     pub delete_story: Statement,
+    // Tasks
+    pub select_task: Statement,
+    pub select_tasks: Statement,
+    pub insert_task: Statement,
+    pub update_task: Statement,
+    pub delete_task: Statement,
 }
 
-impl Statements {
-    /// Prepare SQL statements for a pg client.
-    /// NOTE: Statements must be executed by the creating client.
+impl Cache {
+    /// Prepare and cache SQL statements for a tokio_postgres client.
+    /// NOTE: Statements must be executed by the client passed in here.
     pub(crate) async fn prepare(client: &Client) -> Self {
         Self {
-            select_story: client.prepare(SQL_SELECT_STORY).await.unwrap(),
-            select_stories: client.prepare(SQL_SELECT_STORIES).await.unwrap(),
-            insert_story: client.prepare(SQL_INSERT_STORY).await.unwrap(),
-            delete_story: client.prepare(SQL_DELETE_STORY).await.unwrap(),
+            // Story
+            select_story: client.prepare(sql::stories::FETCH).await.unwrap(),
+            select_stories: client.prepare(sql::stories::SELECT).await.unwrap(),
+            insert_story: client.prepare(sql::stories::INSERT).await.unwrap(),
+            update_story: client.prepare(sql::stories::UPDATE).await.unwrap(),
+            delete_story: client.prepare(sql::stories::DELETE).await.unwrap(),
+            // Task
+            select_task: client.prepare(sql::tasks::FETCH).await.unwrap(),
+            select_tasks: client.prepare(sql::tasks::SELECT).await.unwrap(),
+            insert_task: client.prepare(sql::tasks::INSERT).await.unwrap(),
+            update_task: client.prepare(sql::tasks::UPDATE).await.unwrap(),
+            delete_task: client.prepare(sql::tasks::DELETE).await.unwrap(),
         }
     }
 }

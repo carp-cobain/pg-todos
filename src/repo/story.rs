@@ -23,12 +23,12 @@ impl Repo {
     }
 
     /// Select a page of stories
-    pub async fn select_stories(&self) -> Result<Vec<Story>> {
-        tracing::debug!("select_stories");
+    pub async fn select_stories(&self, page_id: i32) -> Result<Vec<Story>> {
+        tracing::debug!("select_stories: page_id={}", page_id);
 
         let stream = self
             .client
-            .query_raw::<_, _, &[i32; 0]>(&self.statements.select_stories, &[])
+            .query_raw(&self.statements.select_stories, &[page_id])
             .await?;
         pin!(stream);
 
@@ -60,11 +60,24 @@ impl Repo {
     }
 
     /// Delete a story.
-    pub async fn delete_story(&self, id: i32) -> Result<u64> {
+    pub async fn delete_story(&self, id: i32) -> Result<()> {
         tracing::debug!("delete_story: {}", id);
+
         self.client
-            .execute_raw(&self.statements.delete_story, &[&id])
-            .await
-            .map_err(Error::from)
+            .execute(&self.statements.delete_story, &[&id])
+            .await?;
+
+        Ok(())
+    }
+
+    /// Update story name.
+    pub async fn update_story(&self, id: i32, name: String) -> Result<Story> {
+        tracing::debug!("update_story: {}, {}", id, name);
+
+        self.client
+            .execute(&self.statements.update_story, &[&name, &id])
+            .await?;
+
+        Ok(Story::new(id, name))
     }
 }

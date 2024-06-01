@@ -8,7 +8,7 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub async fn new(config: Arc<Config>) -> Self {
+    pub async fn init_from_config(config: Arc<Config>) -> Self {
         let config = Arc::clone(&config);
         let repo = Arc::new(Repo::new(&config.db_url).await);
         Self { config, repo }

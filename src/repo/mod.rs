@@ -1,28 +1,27 @@
 use crate::Error;
-use statements::Statements;
+use statements::Cache;
 use tokio_postgres::{Client, Error as DbError, NoTls};
 
+/// SQL queries
+mod sql;
 mod statements;
 mod story;
+mod task;
 
 pub struct Repo {
     client: Client,
-    statements: Statements,
+    statements: Cache,
 }
 
 impl Repo {
     pub async fn new(db_url: &str) -> Self {
-        let (client, conn) = tokio_postgres::connect(db_url, NoTls)
-            .await
-            .expect("db connect failed");
-
+        let (client, conn) = tokio_postgres::connect(db_url, NoTls).await.unwrap();
         tokio::spawn(async move {
             if let Err(err) = conn.await {
-                panic!("connection error: {:?}", err);
+                panic!("connection error: {}", err);
             }
         });
-
-        let statements = Statements::prepare(&client).await;
+        let statements = Cache::prepare(&client).await;
         Self { client, statements }
     }
 }

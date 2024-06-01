@@ -6,7 +6,7 @@ use pg_todos::{
     api::{Api, Ctx},
     config::Config,
 };
-use std::{env, sync::Arc, thread};
+use std::{sync::Arc, thread};
 use tokio::runtime::Builder;
 
 fn main() {
@@ -22,19 +22,17 @@ fn main() {
     let rt = Builder::new_current_thread().enable_all().build().unwrap();
 
     // If enabled, spin up a series of runtimes in background threads
-    if env::var("BG_RUNTIMES").is_ok() {
-        let n = num_cpus::get();
-        tracing::debug!("spinning up {} background runtimes", n);
-        for _ in 1..n {
-            let config = Arc::clone(&config);
-            thread::spawn(move || {
-                Builder::new_current_thread()
-                    .enable_all()
-                    .build()
-                    .unwrap()
-                    .block_on(serve(config));
-            });
-        }
+    let n = num_cpus::get();
+    tracing::debug!("spinning up {} tokio runtimes", n);
+    for _ in 1..n {
+        let config = Arc::clone(&config);
+        thread::spawn(move || {
+            Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(serve(config));
+        });
     }
 
     // Run a server on the main thread
@@ -44,7 +42,7 @@ fn main() {
 
 async fn serve(config: Arc<Config>) {
     let listener = config.tcp_listener();
-    let ctx = Ctx::new(config).await;
+    let ctx = Ctx::init_from_config(config).await;
     let api = Api::new(Arc::new(ctx));
     axum::serve(listener, api.routes()).await.unwrap();
 }

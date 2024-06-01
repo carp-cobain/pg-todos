@@ -39,14 +39,14 @@ then, in another terminal
 
 ```sh
 brew install wrk # if not already installed
-wrk -t1 -c1 --script scripts/create_story.lua http://127.0.0.1:8080/
+wrk -t1 -c1 --script scripts/create-stories.lua http://127.0.0.1:8080/
 ```
 
 ## benchmark
 
 ```sh
 cargo build --release
-BG_RUNTIMES=1 RUST_LOG=off target/release/pg-todos
+RUST_LOG=off target/release/pg-todos
 ```
 
 then, in another terminal,
